@@ -3,6 +3,7 @@ import time
 import re
 import os
 import subprocess
+import shutil
 from datetime import datetime, timezone, timedelta
 
 try:
@@ -126,7 +127,7 @@ def insight_exists(story_id, suffix):
 
 
 def generate_insight(story_id, url, date_prefix, suffix="", chinese_title=None):
-    os.makedirs("insights", exist_ok=True)
+    os.makedirs("data", exist_ok=True)
 
     if suffix:
         insight_file = f"{date_prefix}_{story_id}_{suffix}.md"
@@ -135,12 +136,12 @@ def generate_insight(story_id, url, date_prefix, suffix="", chinese_title=None):
 
     print(f"\n  Generating insight for story {story_id}...")
     print(f"  URL: {url}")
-    print(f"  Output: insights/{insight_file}")
+    print(f"  Output: data/{insight_file}")
 
     cmd = [
         "opencode",
         "run",
-        f"帮我总结洞察{url}。要求：报告必须是中文的，报告顶部包含洞察链接和基本信息，洞察结果保存在当前目录的 insights 目录的{insight_file}",
+        f"帮我总结洞察{url}。要求：报告必须是中文的，报告顶部包含洞察链接和基本信息，洞察结果保存在当前目录的 data 目录的{insight_file}",
         "--model",
         "opencode/minimax-m2.5-free",
     ]
@@ -160,6 +161,13 @@ def generate_insight(story_id, url, date_prefix, suffix="", chinese_title=None):
         print(f"  Error: {type(e).__name__}: {e}")
         return None
 
+    data_path = f"data/{insight_file}"
+    if not os.path.exists(data_path):
+        print(f"  Error: Insight file not found at {data_path}")
+        return None
+
+    os.makedirs("insights", exist_ok=True)
+
     if chinese_title:
         chinese_title = sanitize_filename(chinese_title)
         base_name = (
@@ -168,14 +176,17 @@ def generate_insight(story_id, url, date_prefix, suffix="", chinese_title=None):
             else f"{date_prefix}_{story_id}"
         )
         new_insight_file = f"{base_name}_{chinese_title}.md"
-        old_path = f"insights/{insight_file}"
-        new_path = f"insights/{new_insight_file}"
-        try:
-            os.rename(old_path, new_path)
-            print(f"  Renamed to: {new_insight_file}")
-            insight_file = new_insight_file
-        except Exception as e:
-            print(f"  Warning: Failed to rename file: {type(e).__name__}: {e}")
+    else:
+        new_insight_file = insight_file
+
+    final_path = f"insights/{new_insight_file}"
+    try:
+        shutil.move(data_path, final_path)
+        print(f"  Moved to: {final_path}")
+        insight_file = new_insight_file
+    except Exception as e:
+        print(f"  Warning: Failed to move file: {type(e).__name__}: {e}")
+        return None
 
     return insight_file
 
