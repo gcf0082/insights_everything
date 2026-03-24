@@ -1,5 +1,5 @@
 const REPO_OWNER = 'gcf0082';
-const REPO_NAME = 'hn_insights';
+const REPO_NAME = 'insights_everything';
 const BRANCH = 'master';
 const INSIGHTS_PATH = 'insights';
 const PAGE_SIZE = 20;
