@@ -225,11 +225,14 @@ def main():
     print("Loading config...")
     config = load_config()
 
+    max_articles = 999999
     if config:
         min_score = config.get("min_score", 0)
         min_descendants = config.get("min_descendants", 0)
+        max_articles = config.get("max_articles", 999999)
         print(f"Min score: {min_score}")
         print(f"Min descendants: {min_descendants}")
+        print(f"Max articles: {max_articles}")
 
         title_rules = config.get("title_rules", [])
         print(f"Title rules: {len(title_rules)} rules")
@@ -336,6 +339,9 @@ def main():
                         continue
 
                 processed_count += 1
+                if processed_count >= max_articles:
+                    print(f"\n  Reached max articles limit ({max_articles})")
+                    break
         except Exception as e:
             error_count += 1
             print(f"\n  Error fetching story {story_id}: {type(e).__name__}")
