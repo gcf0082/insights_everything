@@ -21,7 +21,8 @@ async function fetchPosts() {
         allPosts = files
             .filter(f => f.type === 'file' && f.name.endsWith('.md'))
             .map(f => parseFileName(f.name, f.sha))
-            .sort((a, b) => b.timestamp - a.timestamp);
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .slice(0, 100);
         
         totalPages = Math.ceil(allPosts.length / PAGE_SIZE);
         renderList();
