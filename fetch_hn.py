@@ -116,13 +116,14 @@ def fetch_story_detail(story_id):
 
 
 def insight_exists(story_id, suffix):
-    if not os.path.exists("insights"):
-        return None
-
     pattern = f"_{story_id}_{suffix}"
-    for filename in os.listdir("insights"):
-        if pattern in filename and filename.endswith(".md"):
-            return filename
+
+    for dir_name in ["insights", "insights_old"]:
+        if not os.path.exists(dir_name):
+            continue
+        for filename in os.listdir(dir_name):
+            if pattern in filename and filename.endswith(".md"):
+                return filename
     return None
 
 
