@@ -366,6 +366,48 @@ def main():
     print(f"  Filtered (title not matched): {filtered_title_count}")
     print(f"  Errors: {error_count}")
 
+    print("\nManaging insights directory...")
+    manage_insights_directory()
+
+
+def manage_insights_directory():
+    insights_dir = "insights"
+    old_dir = "insights_old"
+    keep_count = 100
+
+    if not os.path.exists(insights_dir):
+        print("  Insights directory does not exist")
+        return
+
+    files = [f for f in os.listdir(insights_dir) if f.endswith(".md")]
+    if not files:
+        print("  No insight files found")
+        return
+
+    file_paths = [(os.path.join(insights_dir, f), f) for f in files]
+    file_paths.sort(key=lambda x: os.path.getmtime(x[0]), reverse=True)
+
+    keep_files = file_paths[:keep_count]
+    move_files = file_paths[keep_count:]
+
+    if not move_files:
+        print(f"  Total {len(files)} files, keeping all (less than {keep_count})")
+        return
+
+    os.makedirs(old_dir, exist_ok=True)
+
+    for src_path, filename in move_files:
+        dst_path = os.path.join(old_dir, filename)
+        try:
+            shutil.move(src_path, dst_path)
+            print(f"  Moved: {filename}")
+        except Exception as e:
+            print(f"  Failed to move {filename}: {type(e).__name__}")
+
+    print(f"  Total {len(files)} files")
+    print(f"  Kept {len(keep_files)} files in {insights_dir}")
+    print(f"  Moved {len(move_files)} files to {old_dir}")
+
 
 if __name__ == "__main__":
     main()
